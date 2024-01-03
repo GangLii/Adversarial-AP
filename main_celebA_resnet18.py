@@ -10,8 +10,8 @@ from train_eval import *
 import argparse
 
 parser = argparse.ArgumentParser(description='Adversarial AP Training')
-parser.add_argument('--method', default='AdAP_LPN')
-parser.add_argument('--th', default=0.6, type=float, help='threshold for squared hinge surragate loss')
+parser.add_argument('--method', default='AdAP_LPN', type=str)
+parser.add_argument('--th', default=0.6, type=float, help='threshold for squared hinge surrogate loss')
 parser.add_argument('--gamma1', default=0.1, type=float)
 parser.add_argument('--gamma2', default=0.9, type=float)
 parser.add_argument('--Lambda', default=0.8, type=float)
