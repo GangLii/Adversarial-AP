@@ -1,6 +1,14 @@
 # Maximization of Average Precision for Deep Learning with Adversarial Ranking Robustness
 This is the official code for the NeurIPS 2023 spotlight paper "Maximization of Average Precision for Deep Learning with Adversarial Ranking Robustness" by Gang Li, Wei Tong, and Tianbao Yang.
 
+## Environment
+```
+python==3.8
+torch==1.9.1
+torchvision==0.10.1
+scikit-learn==1.3.0
+opencv-python==4.6.0
+```
 ## Training
 git clone
 ```
