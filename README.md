@@ -8,6 +8,7 @@ CUDA_VISIBLE_DEVICES=0  python ./main_cifar10_resnet18.py \
 --method=AdAP_LPN \
 --gamma1=0.1 --gamma2=0.9 --Lambda=0.8
 ```
+Below is an example of running the method "AdAP_LN" on CIFAR10 dataset.
 ```
 CUDA_VISIBLE_DEVICES=0  python ./main_cifar10_resnet18.py \
 --method=AdAP_LN \
