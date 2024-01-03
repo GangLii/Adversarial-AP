@@ -2,10 +2,10 @@ import torch
 import numpy as np
 import random
 
-from .utils.preprocess import *
-from .utils.utils import *
-from .utils.imbalanced_cifar import *
-from .configs.config_celebA import conf
+from utils.preprocess import *
+from utils.utils import *
+from utils.imbalanced_cifar import *
+from configs.config_celebA import conf
 from train_eval import *
 import argparse
 
