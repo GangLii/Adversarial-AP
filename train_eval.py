@@ -175,6 +175,7 @@ def train_classification(model, optimizer, train_loader, criterion=None, loss_ty
     for i, (index, inputs, target) in enumerate(train_loader):
 
         optimizer.zero_grad()
+        index = index.to(device)
         inputs = inputs.to(device)
         target = target.to(device).float()
 
