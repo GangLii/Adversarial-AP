@@ -31,3 +31,6 @@ This is a list of different optimization methods compared in the paper. We summa
 - 'PGD' : PGD
 - 'AP' : AP Max.
 - 'CE' : CE Min.
+
+## Contact
+If you have any questions, please open a new issue or contact Gang Li via <gang-li@tamu.edu>
