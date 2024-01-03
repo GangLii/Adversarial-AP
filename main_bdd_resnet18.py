@@ -7,7 +7,14 @@ from utils import *
 from config_bdd import conf
 from train_eval import *
 from imbalanced_cifar import *
+import argparse
 
+parser = argparse.ArgumentParser(description='Adversarial AP Training')
+parser.add_argument('--method', default='AdAP_LPN')
+parser.add_argument('--th', default=0.6, type=float, help='threshold for squared hinge surragate loss')
+parser.add_argument('--gamma1', default=0.1, type=float)
+parser.add_argument('--gamma2', default=0.9, type=float)
+parser.add_argument('--Lambda', default=0.8, type=float)
 
 
 def set_all_seeds(SEED):
@@ -18,20 +25,22 @@ def set_all_seeds(SEED):
     torch.cuda.manual_seed(SEED)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
-    
+
+root = 'path to root' ### PATH TO THE DATA FOLDER
+train_data_path = root + "train_x.npz"
+train_attr_path = root + "train_y.npy"
+test_data_path = root + "test_x.npz"
+test_attr_path = root + "test_y.npy"    
     
 if __name__ == '__main__':
     set_all_seeds(7777)
-
-    root = 'path to root'
-    train_data_path = root + "train_x.npz"
-    train_attr_path = root + "train_y.npy"
-    test_data_path = root + "test_x.npz"
-    test_attr_path = root + "test_y.npy"
+    args = parser.parse_args()
 
     model_name = 'resnet18'
-    conf['loss_type'] = 'adv_x' ### please refer to 'Dict of Abbrevidations.txt'
-    conf['loss_param'] = {'threshold': 0.6, 'gamma':(0.1,0.9), 'Lambda':0.8,} 
+    conf['loss_type'] = args.method
+    conf['loss_param'] = {'threshold': args.th, 'gamma':(args.gamma1,args.gamma2),
+                          'Lambda':args.Lambda} 
+    
     out_path = './Released_results/{}/bdd_residential/results_{}'.format(model_name, conf['loss_type'])
     if not os.path.exists(out_path):   
         os.makedirs(out_path)

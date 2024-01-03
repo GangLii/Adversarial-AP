@@ -1,4 +1,4 @@
-This is a list of diffenrent optimization methods used in the code. We summarize them here for references.
+This is a list of diffenrent optimization methods compared in the paper. We summarize them here for reference.
 'AdAP_LPN':AdAP_LPN
 'AdAP_LN':AdAP_LN
 'AdAP_LZ':AdAP_LZ

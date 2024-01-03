@@ -7,7 +7,14 @@ from utils import *
 from config_cifar import conf
 from train_eval import *
 from imbalanced_cifar import *
+import argparse
 
+parser = argparse.ArgumentParser(description='Adversarial AP Training')
+parser.add_argument('--method', default='AdAP_LPN')
+parser.add_argument('--th', default=0.6, type=float, help='threshold for squared hinge surragate loss')
+parser.add_argument('--gamma1', default=0.1, type=float)
+parser.add_argument('--gamma2', default=0.9, type=float)
+parser.add_argument('--Lambda', default=0.8, type=float)
 
 
 def set_all_seeds(SEED):
@@ -22,9 +29,12 @@ def set_all_seeds(SEED):
     
 if __name__ == '__main__':
     set_all_seeds(7777)
+    args = parser.parse_args()
+
     model_name = 'resnet18'
-    conf['loss_type'] = 'AdAP_LPN' ### please refer to 'Dict of Abbrevidations.txt'
-    conf['loss_param'] = {'threshold': 0.6, 'gamma':(0.1,0.9), 'Lambda':0.8} 
+    conf['loss_type'] = args.method
+    conf['loss_param'] = {'threshold': args.th, 'gamma':(args.gamma1,args.gamma2),
+                          'Lambda':args.Lambda} 
 
     for cls in range(10):
         out_path = './Released_results/{}/cifar100_coarsecls{}/results_{}'.format(model_name, cls, conf['loss_type'])
