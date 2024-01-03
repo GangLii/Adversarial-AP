@@ -16,7 +16,7 @@ CUDA_VISIBLE_DEVICES=0  python ./main_cifar100_resnet18.py \
 ```
 
 ## List of methods
-This is a list of different optimization methods compared in the paper. We summarize them here for reference
+This is a list of different optimization methods compared in the paper. We summarize them here for reference.
 - 'AdAP_LPN' : AdAP_LPN
 - 'AdAP_LN' : AdAP_LN
 - 'AdAP_LZ' : AdAP_LZ
