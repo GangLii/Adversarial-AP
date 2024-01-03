@@ -2,6 +2,10 @@
 This is the official code for the NeurIPS 2023 spotlight paper "Maximization of Average Precision for Deep Learning with Adversarial Ranking Robustness" by Gang Li, Wei Tong, and Tianbao Yang.
 
 ## Training
+git clone
+```
+git clone https://github.com/GangLii/Adversarial-AP.git
+```
 Below is an example of running the method "AdAP_LPN" on CIFAR10 dataset.
 ```
 CUDA_VISIBLE_DEVICES=0  python ./main_cifar10_resnet18.py \
