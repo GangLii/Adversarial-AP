@@ -6,10 +6,9 @@ from torch.optim import Adam, SGD
 from torch.utils.data import DataLoader
 
 from sklearn.metrics import average_precision_score
-import matplotlib.pyplot as plt
-from tqdm import tqdm
 
-from new_loss import DataSampler, AUPRC_Loss, TRADES, MART, ADV_AP_V2, ADV_TRADES, MinM_AP, ADV_AP_X
+from losses import DataSampler, AUPRC_Loss, TRADES, MART
+from losses import AdAP_LN, AdAP_LPN, AdAP_LZ, AdAP_PZ, AdAP_MM
 from attacks import ranking_attack_v1, PGD_attack, TRADES_attack, AP_attack
 
 
@@ -18,8 +17,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 ### This is run function for classification tasks
 def run_classification(i, train_dataset, val_dataset, test_dataset, model, conf,
-         save_dir,logger, imb_factor = 0.02):
-
+         save_dir,logger):
 
     model = model.to(device)
     if conf['pre_train'] is not None:
@@ -31,34 +29,39 @@ def run_classification(i, train_dataset, val_dataset, test_dataset, model, conf,
         model.fc.reset_parameters()
 
 
-    if conf['loss_type']  in ['ce','pgd']:
+    if conf['loss_type']  in ['CE','PGD']:
         criterion = torch.nn.BCELoss()
-    elif conf['loss_type'] in ['adv_2','adv_2m']:
-        criterion = ADV_AP_V2(margin=conf['loss_param']['threshold'],
+    elif conf['loss_type'] in ['AdAP_LN']:
+        criterion = AdAP_LN(margin=conf['loss_param']['threshold'],
                                 gamma = conf['loss_param']['gamma'], 
                                 Lambda = conf['loss_param']['Lambda'],
                                 data_length = len(train_dataset))
-    elif conf['loss_type'] in ['adv_x']:
-        criterion = ADV_AP_X(margin=conf['loss_param']['threshold'],
+    elif conf['loss_type'] in ['AdAP_LZ']:
+        criterion = AdAP_LZ(margin=conf['loss_param']['threshold'],
                                 gamma = conf['loss_param']['gamma'], 
                                 Lambda = conf['loss_param']['Lambda'],
                                 data_length = len(train_dataset))
-    elif conf['loss_type'] in ['adv_t']:
-        criterion = ADV_TRADES(margin=conf['loss_param']['threshold'],
+    elif conf['loss_type'] in ['AdAP_LPN']:
+        criterion = AdAP_LPN(margin=conf['loss_param']['threshold'],
+                                gamma = conf['loss_param']['gamma'], 
+                                Lambda = conf['loss_param']['Lambda'],
+                                data_length = len(train_dataset))
+    elif conf['loss_type'] in ['AdAP_PZ']:
+        criterion = AdAP_PZ(margin=conf['loss_param']['threshold'],
                                 gamma = conf['loss_param']['gamma'][0], 
                                 Lambda = conf['loss_param']['Lambda'],
                                 data_length = len(train_dataset))
-    elif conf['loss_type'] in ['ap']:
+    elif conf['loss_type'] in ['AP']:
         criterion = AUPRC_Loss(margin=conf['loss_param']['threshold'],
                                 gamma = conf['loss_param']['gamma'][0], 
                                 data_length = len(train_dataset))
-    elif conf['loss_type'] in ['mm_ap']:
-        criterion = MinM_AP(margin=conf['loss_param']['threshold'],
+    elif conf['loss_type'] in ['AdAP_MM']:
+        criterion = AdAP_MM(margin=conf['loss_param']['threshold'],
                                 gamma = conf['loss_param']['gamma'][0], 
                                 data_length = len(train_dataset))
-    elif conf['loss_type'] in ['tra']:
+    elif conf['loss_type'] in ['TRADES']:
         criterion = TRADES(Lambda = conf['loss_param']['Lambda'])
-    elif conf['loss_type'] in ['mart']:
+    elif conf['loss_type'] in ['MART']:
         criterion = MART(Lambda = conf['loss_param']['Lambda'])
 
    
@@ -68,7 +71,7 @@ def run_classification(i, train_dataset, val_dataset, test_dataset, model, conf,
     val_loader = DataLoader(val_dataset, conf['batch_size'], shuffle=False, num_workers=6, pin_memory=False)
     test_loader = DataLoader(test_dataset, conf['batch_size'], shuffle=False, num_workers=6, pin_memory=False)
 
-    if conf['loss_type'] in ['ce', 'tra', 'pgd','mart']:
+    if conf['loss_type'] in ['CE', 'TRADES', 'PGD','MART']:
         train_loader = DataLoader(train_dataset, conf['batch_size'], shuffle=True, drop_last=False, num_workers=6,
                                     pin_memory=False)
     else:
@@ -104,15 +107,15 @@ def run_classification(i, train_dataset, val_dataset, test_dataset, model, conf,
 
             if best_val_scores[k] <= val_ap_results[k]:
                 best_val_scores[k] = val_ap_results[k]
-                if (k==1 and conf['loss_type'] not in ['ce','ap']) or (k==0
-                        and conf['loss_type'] in ['ce','ap']) :  ### we focus on robust ap
+                if (k==1 and conf['loss_type'] not in ['CE','AP']) or (k==0
+                        and conf['loss_type'] in ['CE','AP']) :  ### we focus on robust ap
                     if epoch != conf['epochs']:
                         test_ap_results = val_classification(model, test_loader)
                     final_test_scores = test_ap_results
                     if save_dir is not None:
                         lr = conf['lr']
                         torch.save({'model':model.state_dict(), 'epoch':epoch}, os.path.join(save_dir, f'{i}_best_{k}_lr{lr}.ckpt'))
-                elif conf['loss_type']=='ce' and save_dir is not None:
+                elif conf['loss_type']=='CE' and save_dir is not None:
                     lr = conf['lr']
                     torch.save({'model':model.state_dict(), 'epoch':epoch}, os.path.join(save_dir, f'{i}_best_{k}_lr{lr}.ckpt'))
 
@@ -135,11 +138,7 @@ def run_classification(i, train_dataset, val_dataset, test_dataset, model, conf,
         if epoch in conf['lr_decay_step']:
             for param_group in optimizer.param_groups:
                 param_group['lr'] = conf['lr_decay_factor'] * param_group['lr']
-                logger.info('learning rate decays to{}'.format(param_group['lr']))
-        # if epoch == 10 and conf['loss_type'] == 'adv_2':
-        #     logger.info('adjust lambda from {} to {}'.format(criterion.Lambda, conf['loss_param']['Lambda']))
-        #     criterion.Lambda = conf['loss_param']['Lambda']
-            
+                logger.info('learning rate decays to{}'.format(param_group['lr']))           
             
     if save_dir is not None:
 
@@ -179,26 +178,26 @@ def train_classification(model, optimizer, train_loader, criterion=None, loss_ty
         inputs = inputs.to(device)
         target = target.to(device).float()
 
-        if loss_type == 'ce':
+        if loss_type == 'CE':
             out = torch.sigmoid(model(inputs))
             if len(target.shape) != 2:
                 target = torch.reshape(target, (-1, 1))
             loss = criterion(out, target)
             loss.backward()
             optimizer.step()
-        elif loss_type in ['ap']:
+        elif loss_type in ['AP']:
             out = torch.sigmoid(model(inputs))
             loss = criterion(out, target, index)
             loss.backward()
             optimizer.step()
-        elif loss_type in ['mm_ap']:
+        elif loss_type in ['AdAP_MM']:
             adv_imgs = AP_attack(model, inputs, target, index, criterion.attack_fn, steps=6, step_size=0.01, eps=0.031)
             
             out_adv = torch.sigmoid(model(adv_imgs))
             loss = criterion(out_adv, target, index)
             loss.backward()
             optimizer.step()            
-        elif loss_type in [ 'adv_2', 'adv_x']:           
+        elif loss_type in [ 'AdAP_LPN', 'AdAP_LN']:           
             adv_imgs = PGD_attack(model, inputs, torch.reshape(target, (-1, 1)), steps=6, step_size=0.01, eps=0.031)
             out = model(inputs)
             out_adv = model(adv_imgs)
@@ -206,7 +205,7 @@ def train_classification(model, optimizer, train_loader, criterion=None, loss_ty
             loss = criterion(out, out_adv, target, index)
             loss.backward()
             optimizer.step()
-        elif loss_type in [ 'adv_2m']:           
+        elif loss_type in [ 'AdAP_LZ']:           
             adv_imgs = ranking_attack_v1(model, inputs, index,torch.reshape(target, (-1, 1)), criterion.attack_fn, steps=6, step_size=0.01, eps=0.031)#steps=10, step_size=0.007, eps=0.031
             out = model(inputs)
             out_adv = model(adv_imgs)
@@ -214,7 +213,7 @@ def train_classification(model, optimizer, train_loader, criterion=None, loss_ty
             loss = criterion(out, out_adv, target, index)
             loss.backward()
             optimizer.step()
-        elif loss_type in ['tra']:
+        elif loss_type in ['TRADES']:
             if len(target.shape) != 2:
                 target = torch.reshape(target, (-1, 1))
             adv_imgs = TRADES_attack(model, inputs, target, steps=6, step_size=0.01, eps=0.031)
@@ -224,7 +223,7 @@ def train_classification(model, optimizer, train_loader, criterion=None, loss_ty
             loss = criterion(out, out_adv, target)
             loss.backward()
             optimizer.step()
-        elif loss_type in ['adv_t']:
+        elif loss_type in ['AdAP_PZ']:
             if len(target.shape) != 2:
                 target = torch.reshape(target, (-1, 1))
             adv_imgs = TRADES_attack(model, inputs, target, steps=6, step_size=0.01, eps=0.031)
@@ -234,7 +233,7 @@ def train_classification(model, optimizer, train_loader, criterion=None, loss_ty
             loss = criterion(out, out_adv, target, index)
             loss.backward()
             optimizer.step()            
-        elif loss_type in ['mart']:
+        elif loss_type in ['MART']:
             if len(target.shape) != 2:
                 target = torch.reshape(target, (-1, 1))
             adv_imgs = PGD_attack(model, inputs, target, steps=6, step_size=0.01, eps=0.031)
@@ -245,7 +244,7 @@ def train_classification(model, optimizer, train_loader, criterion=None, loss_ty
             loss.backward()
             optimizer.step()
             
-        elif loss_type in ['pgd']:
+        elif loss_type in ['PGD']:
             if len(target.shape) != 2:
                 target = torch.reshape(target, (-1, 1))
             adv_imgs = PGD_attack(model, inputs, target, steps=6, step_size=0.01, eps=0.031)

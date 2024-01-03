@@ -60,9 +60,9 @@ class DataSampler(Sampler):
         return len(self.ret)
 
 ###This is the objective of AdAP_LN and AdAP_LZ in the paper.
-class ADV_AP_V2(nn.Module):  
+class AdAP_LN(nn.Module):  
     def __init__(self, margin, gamma, Lambda, data_length, loss_type = 'sqh'):
-        super(ADV_AP_V2, self).__init__()
+        super(AdAP_LN, self).__init__()
         self.u_all = torch.tensor([0.0]*data_length).view(-1, 1).cuda()
         self.u_pos = torch.tensor([0.0]*data_length).view(-1, 1).cuda()
         self.u_r = torch.zeros(3).cuda()
@@ -94,7 +94,6 @@ class ADV_AP_V2(nn.Module):
 
         #### TODO
         y_prob = torch.sigmoid(y_pred)  
-        # y_prob = torch.sigmoid(y_pred_adv)  ##adv
         y_pred = torch.tanh(y_pred)/self.tau
         y_pred_adv = torch.tanh(y_pred_adv)/self.tau
         #####****compute natural loss****####
@@ -140,10 +139,13 @@ class ADV_AP_V2(nn.Module):
 
         return loss
 
+##alias
+AdAP_LZ = AdAP_LN
+
 ###This is AdAP_LPN in the paper.
-class ADV_AP_X(nn.Module):  
+class AdAP_LPN(nn.Module):  
     def __init__(self, margin, gamma, Lambda, data_length, loss_type = 'sqh'):
-        super(ADV_AP_X, self).__init__()
+        super(AdAP_LPN, self).__init__()
         self.u_all = torch.tensor([0.0]*data_length).view(-1, 1).cuda()
         self.u_pos = torch.tensor([0.0]*data_length).view(-1, 1).cuda()
         self.u_r = torch.zeros(3).cuda()
@@ -265,9 +267,9 @@ class AUPRC_Loss(torch.nn.Module):
 
 
 ###This is AdAP_MM in the paper. 
-class MinM_AP(nn.Module):  
+class AdAP_MM(nn.Module):  
     def __init__(self, margin, gamma, data_length):
-        super(MinM_AP, self).__init__()
+        super(AdAP_MM, self).__init__()
         self.u_all = torch.tensor([0.0]*data_length).view(-1, 1).cuda()
         self.u_pos = torch.tensor([0.0]*data_length).view(-1, 1).cuda()
         self.margin = margin
@@ -326,9 +328,9 @@ class MinM_AP(nn.Module):
         return loss
    
 ###This is AdAP_PZ in the paper. 
-class ADV_TRADES(nn.Module): 
+class AdAP_PZ(nn.Module): 
     def __init__(self, margin, gamma, Lambda, data_length):
-        super(ADV_TRADES, self).__init__()
+        super(AdAP_PZ, self).__init__()
         self.u_all = torch.tensor([0.0]*data_length).view(-1, 1).cuda()
         self.u_pos = torch.tensor([0.0]*data_length).view(-1, 1).cuda()
         self.margin = margin

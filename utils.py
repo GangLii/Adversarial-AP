@@ -1,8 +1,7 @@
 import torch
-from torchvision.models.resnet import ResNet, Bottleneck, BasicBlock
-from torchvision.datasets.folder import ImageFolder
-import numpy as np
 import torchvision
+import logging
+import sys
 
 
 def resnet18(num_classes=1):
@@ -26,8 +25,6 @@ def resnet50(num_classes=1):
 
     return model
 
-import logging
-import sys
 
 def logger_init(out_pth):
     logger = logging.getLogger(__name__)

@@ -18,41 +18,41 @@ def set_all_seeds(SEED):
     torch.cuda.manual_seed(SEED)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
-set_all_seeds(7777)
-
-
-model_name = 'resnet18scratch'
-conf['loss_type'] = 'adv_t' ### please refer to 'Dict of Abbrevidations.txt'
-conf['loss_param'] = {'threshold': 0.6, 'gamma':(0.9,0.1), 'Lambda':0.8} 
-
-for cls in range(10):
-    out_path = './Released_results/{}/cifar100_coarsecls{}/results_{}'.format(model_name, cls, conf['loss_type'])
-    if not os.path.exists(out_path):   
-        os.makedirs(out_path)
     
-    # CUDA_VISIBLE_DEVICES=7  nohup python ../main_cifar100_resnet18.py &
-    logger = logger_init(out_path+'/log.log')
-    for lr in [1e-3,1e-4,1e-5]:
-        if out_path is not None:
-            fp = open(os.path.join(out_path, 'new_res.txt'), 'a')
-            fp.write('new parameter \n')
-            fp.close()
-        for i in range(3):
-            set_all_seeds(7777 + i)
-            model = resnet18()
-            pos_class = cls
-            train_dataset = OvA_CIFAR100(root='../data', download=True, transform = transform_train, mode = 'train', pos_class=pos_class, seed=i )
-            val_dataset = OvA_CIFAR100(root='../data', download=True, transform=transform_val, mode = 'valid', pos_class=pos_class, seed=i)
-            test_dataset = OvA_CIFAR100(root='../data', train=False, download=True, transform=transform_val, mode = 'test', pos_class=pos_class, seed=i)
-            
+    
+if __name__ == '__main__':
+    set_all_seeds(7777)
+    model_name = 'resnet18'
+    conf['loss_type'] = 'AdAP_LPN' ### please refer to 'Dict of Abbrevidations.txt'
+    conf['loss_param'] = {'threshold': 0.6, 'gamma':(0.1,0.9), 'Lambda':0.8} 
 
-            ##***TO DO***#
-            conf['lr'] = lr 
-            conf['pre_train'] = f'./Released_results/resnet18scratch/cifar100_coarsecls{cls}/results_ce/{i}_best_0_lr0.001.ckpt'
+    for cls in range(10):
+        out_path = './Released_results/{}/cifar100_coarsecls{}/results_{}'.format(model_name, cls, conf['loss_type'])
+        if not os.path.exists(out_path):   
+            os.makedirs(out_path)
+        
+        # CUDA_VISIBLE_DEVICES=7  nohup python ../main_cifar100_resnet18.py &
+        logger = logger_init(out_path+'/log.log')
+        for lr in [1e-3,1e-4,1e-5]:
+            if out_path is not None:
+                fp = open(os.path.join(out_path, 'new_res.txt'), 'a')
+                fp.write('new parameter \n')
+                fp.close()
+            for i in range(3):
+                set_all_seeds(7777 + i)
+                model = resnet18()
+                pos_class = cls
+                train_dataset = OvA_CIFAR100(root='./data', download=True, transform = transform_train, mode = 'train', pos_class=pos_class, seed=i )
+                val_dataset = OvA_CIFAR100(root='./data', download=True, transform=transform_val, mode = 'valid', pos_class=pos_class, seed=i)
+                test_dataset = OvA_CIFAR100(root='./data', train=False, download=True, transform=transform_val, mode = 'test', pos_class=pos_class, seed=i)
+                
 
-            logger.info(pos_class)
-            logger.info(conf)
-            logger.info(i)
+                ##***TO DO***#
+                conf['lr'] = lr 
 
-            run_classification(i, train_dataset, val_dataset, test_dataset, model, 
-                                conf, out_path, logger)
+                logger.info(pos_class)
+                logger.info(conf)
+                logger.info(i)
+
+                run_classification(i, train_dataset, val_dataset, test_dataset, model, 
+                                    conf, out_path, logger)
