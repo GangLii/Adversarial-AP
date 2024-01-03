@@ -2,15 +2,15 @@ import torch
 import numpy as np
 import random
 
-from preprocess import *
-from utils import *
-from config_cifar import conf
+from .utils.preprocess import *
+from .utils.utils import *
+from .utils.imbalanced_cifar import *
+from .configs.config_cifar import conf
 from train_eval import *
-from imbalanced_cifar import *
 import argparse
 
 parser = argparse.ArgumentParser(description='Adversarial AP Training')
-parser.add_argument('--method', default='AdAP_LPN')
+parser.add_argument('--method', default='AdAP_LPN',type=str)
 parser.add_argument('--th', default=0.6, type=float, help='threshold for squared hinge surragate loss')
 parser.add_argument('--gamma1', default=0.1, type=float)
 parser.add_argument('--gamma2', default=0.9, type=float)
