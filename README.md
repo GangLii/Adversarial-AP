@@ -41,7 +41,7 @@ This is a list of different optimization methods compared in the paper. We summa
 - 'CE' : CE Min.
 
 ## Contact
-If you have any questions, please open a new issue or contact Gang Li via <gang-li@tamu.edu>. If you find this repo helpful, cite the following paper:
+If you have any questions, please open a new issue or contact Gang Li via <gang-li@tamu.edu>. If you find this repo helpful, please cite the following paper:
 ```
 @inproceedings{li2023maximization,
   title={Maximization of Average Precision for Deep Learning with Adversarial Ranking Robustness},
