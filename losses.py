@@ -33,7 +33,7 @@ class DataSampler(Sampler):
         for batch_id in range(self.batchNum):
             #### load postive samples
             beg = batch_id*self.batch_size
-            if self.posPtr+self.pos_num > self.posLen:
+            if self.posPtr+self.pos_num >= self.posLen:
                 temp = self.posList[self.posPtr:]
                 np.random.shuffle(self.posList)
                 self.posPtr = (self.posPtr+self.pos_num)%self.posLen
@@ -44,7 +44,7 @@ class DataSampler(Sampler):
 
             ### load negative samples
             beg += self.pos_num
-            if self.negPtr+self.neg_num > self.negLen:
+            if self.negPtr+self.neg_num >= self.negLen:
                 temp = self.negList[self.negPtr:]
                 np.random.shuffle(self.negList)
                 self.negPtr = (self.negPtr+self.neg_num)%self.negLen
