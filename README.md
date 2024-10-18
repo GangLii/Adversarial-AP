@@ -1,5 +1,5 @@
-# [Maximization of Average Precision for Deep Learning with Adversarial Ranking Robustness](https://proceedings.neurips.cc/paper_files/paper/2023/file/31f04c174a6af322e9417b7a9a91097a-Paper-Conference.pdf)
-This is the official code for the NeurIPS 2023 spotlight paper "Maximization of Average Precision for Deep Learning with Adversarial Ranking Robustness" by Gang Li, Wei Tong, and Tianbao Yang.
+# Maximization of Average Precision for Deep Learning with Adversarial Ranking Robustness
+This is the official code for the NeurIPS 2023 spotlight paper "[Maximization of Average Precision for Deep Learning with Adversarial Ranking Robustness](https://proceedings.neurips.cc/paper_files/paper/2023/file/31f04c174a6af322e9417b7a9a91097a-Paper-Conference.pdf)" by Gang Li, Wei Tong, and Tianbao Yang.
 
 ## Environment
 ```
